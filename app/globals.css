@@ -1,0 +1,471 @@
+:root {
+  --bg: #0f1115;
+  --panel: #171a21;
+  --panel2: #1e2230;
+  --line: #2a2f3d;
+  --text: #e8eaf0;
+  --dim: #8a91a3;
+  --faint: #565d70;
+  --teach: #4f8ef7;
+  --studio: #3dbf7a;
+  --break: #e6b23c;
+  --crit: #b07df0;
+  --admin: #7a828f;
+  --over: #f05b5b;
+  --under: #e6b23c;
+  --ok: #3dbf7a;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 0 20px 24px;
+}
+
+/* ---- header ---- */
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 4px;
+  border-bottom: 1px solid var(--line);
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+.app-header h1 {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.session-select {
+  flex: 1 1 240px;
+  max-width: 460px;
+}
+.app-header .pill {
+  margin-left: auto;
+}
+
+/* ---- controls / inputs ---- */
+select,
+button,
+input[type="text"],
+input[type="number"] {
+  font: inherit;
+  color: var(--text);
+  background: var(--panel2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 7px 12px;
+}
+select,
+button {
+  cursor: pointer;
+}
+select:hover,
+button:hover:not(:disabled),
+input:focus {
+  border-color: #454c5e;
+  outline: none;
+}
+button {
+  font-weight: 600;
+}
+button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.btn-primary {
+  background: var(--teach);
+  border-color: var(--teach);
+  color: #0b1220;
+  font-weight: 700;
+}
+.btn-primary:hover:not(:disabled) {
+  background: #6aa0f8;
+  border-color: #6aa0f8;
+}
+.btn-warn {
+  color: var(--over);
+}
+
+/* ---- projection pill ---- */
+.pill {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 14px;
+  border: 1px solid var(--line);
+  white-space: nowrap;
+}
+.pill.ok {
+  color: var(--ok);
+  border-color: var(--ok);
+}
+.pill.over {
+  color: var(--over);
+  border-color: var(--over);
+}
+.pill.under {
+  color: var(--under);
+  border-color: var(--under);
+}
+
+/* ---- layout ---- */
+.layout {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 18px;
+  align-items: start;
+}
+@media (max-width: 980px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+/* ---- NOW panel ---- */
+.now {
+  padding: 26px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.nowlabel {
+  font-size: 13px;
+  letter-spacing: 0.25em;
+  color: var(--dim);
+  text-transform: uppercase;
+}
+.block-name {
+  font-size: clamp(22px, 3.2vw, 40px);
+  font-weight: 700;
+  margin: 10px 0 2px;
+  line-height: 1.15;
+}
+.block-type {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.clock {
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(70px, 13vw, 170px);
+  font-weight: 800;
+  line-height: 1;
+  margin: 12px 0 6px;
+  letter-spacing: 0.01em;
+}
+.clock.overtime {
+  color: var(--over);
+  animation: pulse 1s infinite;
+}
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+.subclock {
+  color: var(--dim);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.blockbar {
+  width: 100%;
+  height: 10px;
+  background: var(--panel2);
+  border-radius: 5px;
+  margin: 18px 0 8px;
+  overflow: hidden;
+}
+.blockbar > div {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.25s linear;
+}
+.nextup {
+  margin-top: 14px;
+  color: var(--dim);
+  font-size: 15px;
+}
+.nextup b {
+  color: var(--text);
+  font-weight: 600;
+}
+.quick {
+  display: flex;
+  gap: 8px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.quick button {
+  font-size: 14px;
+}
+.done-banner {
+  font-size: 20px;
+  font-weight: 700;
+  margin-top: 14px;
+}
+
+/* ---- homework ---- */
+.hwcard {
+  padding: 16px 20px;
+}
+.hwcard.active {
+  border-color: var(--teach);
+  box-shadow: 0 0 0 1px var(--teach);
+}
+.hw-title {
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 10px;
+}
+.hw {
+  list-style: none;
+}
+.hw li {
+  position: relative;
+  padding: 4px 0 4px 22px;
+  font-size: 15px;
+  line-height: 1.45;
+}
+.hw li::before {
+  content: "→";
+  position: absolute;
+  left: 0;
+  color: var(--teach);
+}
+.none {
+  color: var(--dim);
+  font-size: 15px;
+}
+
+/* ---- agenda panel ---- */
+.agenda {
+  padding: 18px 20px;
+}
+.agenda-title {
+  font-size: 13px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--dim);
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+.sessionbar {
+  display: flex;
+  height: 14px;
+  border-radius: 7px;
+  overflow: hidden;
+  gap: 2px;
+  margin-bottom: 6px;
+}
+.sessionbar .seg {
+  position: relative;
+  background: var(--panel2);
+}
+.sessionbar .seg > i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  display: block;
+  height: 100%;
+}
+.meta-line {
+  display: flex;
+  justify-content: space-between;
+  color: var(--dim);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.agenda-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.agenda-table th {
+  text-align: left;
+  color: var(--faint);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 4px 6px;
+}
+.agenda-table td {
+  padding: 7px 6px;
+  border-top: 1px solid var(--line);
+  font-variant-numeric: tabular-nums;
+  vertical-align: middle;
+}
+.agenda-table tr.done {
+  opacity: 0.45;
+}
+.agenda-table tr.current td {
+  background: #232a3a;
+}
+.agenda-table tr.current td:first-child {
+  border-radius: 8px 0 0 8px;
+}
+.agenda-table tr.current td:last-child {
+  border-radius: 0 8px 8px 0;
+}
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.bname {
+  font-weight: 500;
+}
+.tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid;
+  white-space: nowrap;
+}
+.plan {
+  color: var(--dim);
+}
+.actual.over {
+  color: var(--over);
+}
+.actual.under-t {
+  color: var(--ok);
+}
+.adj {
+  display: flex;
+  gap: 4px;
+}
+.adj button {
+  padding: 3px 8px;
+  font-size: 13px;
+  border-radius: 6px;
+  line-height: 1.2;
+  font-weight: 600;
+}
+.drag-handle {
+  cursor: grab;
+  color: var(--faint);
+  user-select: none;
+  font-size: 13px;
+  width: 20px;
+  text-align: center;
+}
+.agenda-table tr.skipped .bname,
+.agenda-table tr.skipped .plan {
+  text-decoration: line-through;
+  color: var(--faint);
+}
+.agenda-table tr.skipped .dot,
+.agenda-table tr.skipped .tag {
+  opacity: 0.35;
+}
+
+/* per-item edit mode */
+.agenda-table tr.editing td {
+  background: #1c2230;
+}
+.edit-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.edit-row input[type="text"] {
+  flex: 1;
+  min-width: 160px;
+}
+.edit-row input[type="number"] {
+  width: 70px;
+}
+.edit-row .btn-primary {
+  padding: 6px 12px;
+}
+
+.addform {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.addform input[type="text"] {
+  flex: 1;
+  min-width: 160px;
+}
+.addform input[type="number"] {
+  width: 70px;
+}
+
+/* ---- teaching-budget meter ---- */
+.teachline {
+  margin-top: 14px;
+  color: var(--dim);
+  font-size: 13px;
+}
+.teachline b {
+  color: var(--text);
+}
+.teachmeter {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--panel2);
+  overflow: hidden;
+  margin-top: 6px;
+  max-width: 240px;
+}
+.teachmeter > span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.2s;
+}
+
+/* ---- footer ---- */
+.app-footer {
+  text-align: center;
+  color: var(--faint);
+  font-size: 12px;
+  padding: 16px 0 8px;
+}

@@ -18,3 +18,12 @@ yarn-error.log*
 
 # env files
 .env*.local
+
+# course assets — staging holds unpublished candidates; never let a commit sweep it in
+/staging/
+
+# internal course/production brief — keep local, do not publish to the public repo
+/CLAUDE.md
+
+# vercel
+.vercel
