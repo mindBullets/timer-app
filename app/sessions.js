@@ -89,8 +89,13 @@ export const SESSION_DATA = {
           "type": "break"
         },
         {
-          "name": "Studio: Stack setup II: scaffold, GitHub, Vercel live URL, Supabase keys",
-          "min": 25,
+          "name": "Micro-lecture: JTBD: your durable job (Amazon CXO style)",
+          "min": 15,
+          "type": "teach"
+        },
+        {
+          "name": "Studio: Draft your durable job card",
+          "min": 10,
           "type": "studio"
         },
         {
@@ -109,7 +114,7 @@ export const SESSION_DATA = {
           "type": "break"
         },
         {
-          "name": "Micro-lecture: User research intro: tasks, think-aloud, 3 to 5 users",
+          "name": "Micro-lecture: Research plan: job-card tasks, think-aloud, 3 to 5 users",
           "min": 15,
           "type": "teach"
         },

@@ -22,6 +22,9 @@ yarn-error.log*
 # course assets — staging holds unpublished candidates; never let a commit sweep it in
 /staging/
 
+# review-then-delete holding pen — never commit
+/to-delete/
+
 # internal course/production brief — keep local, do not publish to the public repo
 /CLAUDE.md
 
