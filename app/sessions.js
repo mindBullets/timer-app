@@ -61,7 +61,7 @@ export const SESSION_DATA = {
       ]
     },
     {
-      "name": "Session 2: Vibe Sprint, Curation Critique & Proposal Lock",
+      "name": "Session 2: Placemat, A/B Sprint & First Push",
       "blocks": [
         {
           "name": "Warm-up: decision defense + stand-up",
@@ -69,12 +69,27 @@ export const SESSION_DATA = {
           "type": "admin"
         },
         {
-          "name": "Micro-lecture: Screen directions + the A/B goal",
+          "name": "Micro-lecture: Zooming in + JTBD + placemat how-to",
+          "min": 20,
+          "type": "teach"
+        },
+        {
+          "name": "Studio: Placemat: journey, jobs, tasks, critical job, build plan",
+          "min": 35,
+          "type": "studio"
+        },
+        {
+          "name": "Break",
+          "min": 10,
+          "type": "break"
+        },
+        {
+          "name": "Micro-lecture: The approaches framework + the A/B goal",
           "min": 15,
           "type": "teach"
         },
         {
-          "name": "Studio: Vibe sprint (Artifacts): 5+ takes on the core screen",
+          "name": "Studio: Sprint: 5+ approaches on the core screen",
           "min": 35,
           "type": "studio"
         },
@@ -85,36 +100,16 @@ export const SESSION_DATA = {
         },
         {
           "name": "Break",
-          "min": 10,
-          "type": "break"
-        },
-        {
-          "name": "Micro-lecture: JTBD: your durable job (Amazon CXO style)",
-          "min": 15,
-          "type": "teach"
-        },
-        {
-          "name": "Studio: Draft your durable job card",
-          "min": 10,
-          "type": "studio"
-        },
-        {
-          "name": "Micro-lecture: Build brief: A and B as two routes, with Claude Code",
-          "min": 10,
-          "type": "teach"
-        },
-        {
-          "name": "Studio: Build versions A and B, deploy",
-          "min": 35,
-          "type": "studio"
-        },
-        {
-          "name": "Break",
           "min": 5,
           "type": "break"
         },
         {
-          "name": "Micro-lecture: Research plan: job-card tasks, think-aloud, 3 to 5 users",
+          "name": "Studio: First push: start route A, watch it deploy",
+          "min": 15,
+          "type": "studio"
+        },
+        {
+          "name": "Micro-lecture: Research plan: tasks, script, the two scales",
           "min": 15,
           "type": "teach"
         },
@@ -125,41 +120,26 @@ export const SESSION_DATA = {
         }
       ],
       "homework": [
-        "Run user research: 3 to 5 real users on A vs B, capture what you saw",
-        "Finish and deploy A and B if class ran short",
-        "Bring findings to Session 3: the research gate decides A, B, or remix"
+        "Finish A and B, deploy both routes",
+        "Refine your placemat if needed",
+        "Run research with 3 to 5 users: script, tasks, both scales"
       ]
     },
     {
-      "name": "Session 3, Research Sprint: JTBD + Job-Coverage Analysis",
+      "name": "Session 3: The Research Gate + Build Plan",
       "blocks": [
         {
-          "name": "Warm-up: decision defense + stand-up",
+          "name": "Warm-up: decision defense: which approach won your test",
           "min": 10,
           "type": "admin"
         },
         {
-          "name": "Micro-lecture: Job statements + the product-independence test",
+          "name": "Micro-lecture: From ratings to colors: score the placemat, CXO style",
           "min": 15,
           "type": "teach"
         },
         {
-          "name": "Studio: Write 3–5 job statements (spreadsheet test)",
-          "min": 35,
-          "type": "studio"
-        },
-        {
-          "name": "Break",
-          "min": 10,
-          "type": "break"
-        },
-        {
-          "name": "Micro-lecture: The 8-step job map, worked example",
-          "min": 15,
-          "type": "teach"
-        },
-        {
-          "name": "Studio: Map one job through all 8 steps",
+          "name": "Studio: Synthesize findings with AI + color your placemat",
           "min": 30,
           "type": "studio"
         },
@@ -169,19 +149,34 @@ export const SESSION_DATA = {
           "type": "break"
         },
         {
-          "name": "Micro-lecture: Job-coverage competitive analysis",
-          "min": 15,
-          "type": "teach"
+          "name": "Critique circle: findings shared, format taught live",
+          "min": 25,
+          "type": "crit"
         },
         {
-          "name": "Studio: Mini coverage grid vs 3–4 competitors",
-          "min": 25,
+          "name": "Studio: The call: A, B, remix, or pivot, in KEPT / OVER / BECAUSE",
+          "min": 10,
           "type": "studio"
         },
         {
-          "name": "Pair share + instructor spot-checks",
+          "name": "Micro-lecture: Flow maps: from placemat steps to screens and states",
           "min": 10,
-          "type": "crit"
+          "type": "teach"
+        },
+        {
+          "name": "Studio: Flow map in FigJam, one path per P1 task",
+          "min": 30,
+          "type": "studio"
+        },
+        {
+          "name": "Break",
+          "min": 5,
+          "type": "break"
+        },
+        {
+          "name": "Studio: Wireframe the first screens, tool of your choice",
+          "min": 30,
+          "type": "studio"
         },
         {
           "name": "Decision log + homework brief",
@@ -190,9 +185,8 @@ export const SESSION_DATA = {
         }
       ],
       "homework": [
-        "BUILD WEEK 1 of 3: first screens of your validated direction with Claude Code",
-        "Finish remaining user/client conversations",
-        "Write your validate-or-pivot call from tonight's research"
+        "BUILD WEEK 1 of 3: first screens from your wireframes with Claude Code",
+        "Finish remaining user and client conversations"
       ]
     },
     {
