@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SESSION_DATA } from "./sessions";
+
+const APP_VERSION = "p2-2026-08-05"; // bump on deploy to verify auto-deploy went live
 
 const TYPES = {
   teach: { label: "Teaching", color: "#4f8ef7" },
@@ -11,7 +13,7 @@ const TYPES = {
   admin: { label: "Housekeeping", color: "#7a828f" },
 };
 const TARGET_MIN = SESSION_DATA.target; // 180 (3-hour contact target)
-const TEACH_BUDGET = 45; // planned teaching minutes target per session
+const TEACH_BUDGET = 45; // soft teaching-minutes budget per session
 
 // ---- formatting -----------------------------------------------------------
 const pad = (n) => String(n).padStart(2, "0");
@@ -33,7 +35,59 @@ function fmtHMS(ms) {
   )}`;
 }
 
-// ---- state model (mirrors the legacy single-file app) ---------------------
+// ---- browser-storage persistence -----------------------------------------
+const LS_PRESETS = "uxcap_presets_v1"; // { [sessionIdx]: [{name,min,type}] }
+const LS_LIVE = "uxcap_live_v1"; // running-session snapshot
+const lsGet = (k) => {
+  try {
+    return JSON.parse(localStorage.getItem(k));
+  } catch {
+    return null;
+  }
+};
+const lsSet = (k, v) => {
+  try {
+    localStorage.setItem(k, JSON.stringify(v));
+  } catch {}
+};
+const lsDel = (k) => {
+  try {
+    localStorage.removeItem(k);
+  } catch {}
+};
+function savePreset(s) {
+  const all = lsGet(LS_PRESETS) || {};
+  all[s.sessionIdx] = s.blocks.map((b) => ({
+    name: b.name,
+    min: b.plannedMin,
+    type: b.type,
+  }));
+  lsSet(LS_PRESETS, all);
+}
+function saveLive(s) {
+  if (s.phase === "idle" || s.phase === "done") {
+    lsDel(LS_LIVE);
+    return;
+  }
+  lsSet(LS_LIVE, {
+    sessionIdx: s.sessionIdx,
+    cur: s.cur,
+    phase: s.phase,
+    accumMs: s.accumMs,
+    lastResume: s.lastResume,
+    startedAt: s.startedAt,
+    savedAt: Date.now(),
+    blocks: s.blocks.map((b) => ({
+      name: b.name,
+      min: b.plannedMin,
+      type: b.type,
+      actualMs: b.actualMs,
+      skipped: b.skipped,
+    })),
+  });
+}
+
+// ---- state model ----------------------------------------------------------
 function makeSession(idx) {
   const src = SESSION_DATA.sessions[idx];
   return {
@@ -51,6 +105,36 @@ function makeSession(idx) {
     accumMs: 0,
     lastResume: null,
     startedAt: null,
+  };
+}
+function applyPreset(base, stored) {
+  if (Array.isArray(stored) && stored.length) {
+    base.blocks = stored.map((b) => ({
+      name: String(b.name),
+      type: TYPES[b.type] ? b.type : "studio",
+      plannedMin: Math.max(0, +b.min || 0),
+      actualMs: null,
+      skipped: false,
+    }));
+  }
+  return base;
+}
+function restoreFromSnap(snap) {
+  return {
+    sessionIdx: snap.sessionIdx,
+    blocks: snap.blocks.map((b) => ({
+      name: b.name,
+      type: TYPES[b.type] ? b.type : "studio",
+      plannedMin: Math.max(0, +b.min || 0),
+      actualMs: b.actualMs == null ? null : b.actualMs,
+      skipped: !!b.skipped,
+    })),
+    homework: SESSION_DATA.sessions[snap.sessionIdx].homework,
+    cur: Math.min(snap.cur, snap.blocks.length - 1),
+    phase: snap.phase === "running" ? "running" : "paused",
+    accumMs: snap.accumMs || 0,
+    lastResume: snap.phase === "running" ? snap.lastResume : null,
+    startedAt: snap.startedAt || Date.now(),
   };
 }
 
@@ -94,17 +178,61 @@ export default function Home() {
   const [addMin, setAddMin] = useState("10");
   const [addType, setAddType] = useState("studio");
   const [editingIndex, setEditingIndex] = useState(null);
+  const [dragIdx, setDragIdx] = useState(null);
+  const [dropMark, setDropMark] = useState(null);
+  const [resumeSnap, setResumeSnap] = useState(null);
 
+  const hydratedRef = useRef(false);
+
+  // Ticks while running so the derived countdown advances.
   useEffect(() => {
     if (state.phase !== "running") return;
     const id = setInterval(() => setTick((t) => t + 1), 250);
     return () => clearInterval(id);
   }, [state.phase]);
 
+  // On mount (client only): apply saved edits for session 0 and detect a
+  // running session left over from a refresh/close.
+  useEffect(() => {
+    const presets = lsGet(LS_PRESETS) || {};
+    if (presets[0]) setState(applyPreset(makeSession(0), presets[0]));
+    const snap = lsGet(LS_LIVE);
+    const valid =
+      snap &&
+      typeof snap.sessionIdx === "number" &&
+      SESSION_DATA.sessions[snap.sessionIdx] &&
+      Array.isArray(snap.blocks) &&
+      Date.now() - (snap.savedAt || 0) <= 6 * 3600 * 1000;
+    if (valid) setResumeSnap(snap);
+    else if (snap) lsDel(LS_LIVE);
+    hydratedRef.current = true;
+  }, []);
+
+  // Persist agenda edits + live timing on every real state change. Held off
+  // until hydration and while a resume prompt is pending (so we don't clobber
+  // the snapshot the user hasn't decided on yet).
+  useEffect(() => {
+    if (!hydratedRef.current || resumeSnap) return;
+    saveLive(state);
+    savePreset(state);
+  }, [state, resumeSnap]);
+
+  // ---- resume prompt ------------------------------------------------------
+  const doResume = () => {
+    setEditingIndex(null);
+    setState(restoreFromSnap(resumeSnap));
+    setResumeSnap(null);
+  };
+  const discardResume = () => {
+    lsDel(LS_LIVE);
+    setResumeSnap(null);
+  };
+
   // ---- actions ------------------------------------------------------------
   const loadSession = (idx) => {
     setEditingIndex(null);
-    setState(makeSession(idx));
+    const presets = lsGet(LS_PRESETS) || {};
+    setState(applyPreset(makeSession(idx), presets[idx]));
   };
 
   const startPause = () =>
@@ -156,12 +284,18 @@ export default function Home() {
     )
       return;
     setEditingIndex(null);
-    setState(makeSession(state.sessionIdx));
+    lsDel(LS_LIVE);
+    const presets = lsGet(LS_PRESETS) || {};
+    setState(applyPreset(makeSession(state.sessionIdx), presets[state.sessionIdx]));
   };
 
   const restoreDefaults = () => {
-    if (!window.confirm("Restore this session's default agenda?")) return;
+    if (!window.confirm("Restore this session's default agenda? Saved edits are discarded."))
+      return;
     setEditingIndex(null);
+    const all = lsGet(LS_PRESETS) || {};
+    delete all[state.sessionIdx];
+    lsSet(LS_PRESETS, all);
     setState(makeSession(state.sessionIdx));
   };
 
@@ -234,6 +368,20 @@ export default function Home() {
     setAddName("");
   };
 
+  // drag reorder (future blocks only; past/current locked)
+  const moveBlock = (from, to) =>
+    setState((prev) => {
+      if (prev.phase === "done") return prev;
+      const minIns = prev.phase === "idle" ? 0 : prev.cur + 1;
+      if (from < minIns || from >= prev.blocks.length) return prev;
+      to = Math.max(minIns, Math.min(to, prev.blocks.length));
+      if (to === from || to === from + 1) return prev;
+      const s = clone(prev);
+      const [b] = s.blocks.splice(from, 1);
+      s.blocks.splice(to > from ? to - 1 : to, 0, b);
+      return s;
+    });
+
   // ---- derived ------------------------------------------------------------
   const s = state;
   const running = s.phase === "running";
@@ -245,6 +393,7 @@ export default function Home() {
   const elapsed = idle || done ? 0 : curElapsedMs(s);
   const remaining = curPlanMs - elapsed;
   const over = remaining < 0;
+  const minIns = idle ? 0 : s.cur + 1;
 
   const projMs = projectedTotalMs(s);
   const deltaMin = Math.round((projMs - TARGET_MIN * 60000) / 60000);
@@ -303,7 +452,6 @@ export default function Home() {
   const startLabel = running ? "⏸ Pause" : idle ? "▶ Start" : "▶ Resume";
   const nextLabel =
     s.cur === s.blocks.length - 1 ? "Finish session ✓" : "Next block ▸";
-  const plannedTotal = s.blocks.reduce((a, b) => a + b.plannedMin, 0);
 
   return (
     <main className="app">
@@ -332,6 +480,22 @@ export default function Home() {
         </button>
         <div className={"pill " + pillClass}>{pillText}</div>
       </header>
+
+      {resumeSnap && (
+        <div className="resume-banner">
+          <span>
+            Resume the session in progress? (
+            {SESSION_DATA.sessions[resumeSnap.sessionIdx].name.split(":")[0]},
+            block {resumeSnap.cur + 1} of {resumeSnap.blocks.length})
+          </span>
+          <span className="resume-actions">
+            <button className="btn-primary" onClick={doResume}>
+              Resume
+            </button>
+            <button onClick={discardResume}>Discard</button>
+          </span>
+        </div>
+      )}
 
       <div className="layout">
         {/* ---- left column: NOW + homework ---- */}
@@ -562,15 +726,60 @@ export default function Home() {
                   );
                 }
 
+                const canDrag = !done && i >= minIns;
                 return (
                   <tr
                     key={i}
+                    draggable={canDrag}
+                    onDragStart={
+                      canDrag
+                        ? (e) => {
+                            setDragIdx(i);
+                            try {
+                              e.dataTransfer.effectAllowed = "move";
+                            } catch {}
+                          }
+                        : undefined
+                    }
+                    onDragEnd={() => {
+                      setDragIdx(null);
+                      setDropMark(null);
+                    }}
+                    onDragOver={(e) => {
+                      if (dragIdx == null || dragIdx === i || i < minIns) return;
+                      e.preventDefault();
+                      const r = e.currentTarget.getBoundingClientRect();
+                      setDropMark({
+                        i,
+                        before: e.clientY < r.top + r.height / 2,
+                      });
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      if (dragIdx == null) return;
+                      const r = e.currentTarget.getBoundingClientRect();
+                      const before = e.clientY < r.top + r.height / 2;
+                      const from = dragIdx;
+                      setDragIdx(null);
+                      setDropMark(null);
+                      moveBlock(from, i + (before ? 0 : 1));
+                    }}
                     className={
                       (isPast ? "done" : isCurrent ? "current" : "") +
-                      (b.skipped ? " skipped" : "")
+                      (b.skipped ? " skipped" : "") +
+                      (i === dragIdx ? " dragging" : "") +
+                      (dropMark && dropMark.i === i
+                        ? dropMark.before
+                          ? " drop-above"
+                          : " drop-below"
+                        : "")
                     }
                   >
-                    <td className="drag-handle" title="Reorder (coming soon)">
+                    <td
+                      className="drag-handle"
+                      title={canDrag ? "Drag to reorder" : ""}
+                      style={{ cursor: canDrag ? "grab" : "default" }}
+                    >
                       ⠿
                     </td>
                     <td>
@@ -702,7 +911,8 @@ export default function Home() {
 
       <footer className="app-footer">
         Target 3:00:00 per session · 7 sessions × 3 hrs = 21 contact hours ·
-        completed blocks lock · adjust ±min, skip ⏭, or remove ✕ upcoming blocks.
+        completed blocks lock · drag ⠿ to reorder · edits &amp; a running session
+        are saved in this browser. <span className="build">build {APP_VERSION}</span>
       </footer>
     </main>
   );
