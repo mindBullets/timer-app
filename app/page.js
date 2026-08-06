@@ -592,7 +592,7 @@ export default function Home() {
             }
           >
             <h2 className="hw-title">
-              {s.homework.length ? "Tonight's homework" : "Homework"}
+              {s.homework.length ? "This week's homework" : "Homework"}
             </h2>
             {s.homework.length ? (
               <ul className="hw">
@@ -909,10 +909,11 @@ export default function Home() {
         </section>
       </div>
 
-      <footer className="app-footer">
+      <footer className="app-footer" data-build={APP_VERSION}>
         Target 3:00:00 per session · 7 sessions × 3 hrs = 21 contact hours ·
         completed blocks lock · drag ⠿ to reorder · edits &amp; a running session
-        are saved in this browser. <span className="build">build {APP_VERSION}</span>
+        are saved in this browser.{" "}
+        <span className="build">{`build ${APP_VERSION}`}</span>
       </footer>
     </main>
   );
